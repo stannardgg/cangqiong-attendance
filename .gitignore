@@ -38,3 +38,6 @@ desktop.ini
 
 # ---- 工具链自己的目录 ----
 .workbuddy/
+
+# ---- 本机一次性助手脚本（不属于项目源码）----
+push-to-github.bat
