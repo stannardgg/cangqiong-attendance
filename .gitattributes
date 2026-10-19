@@ -1,0 +1,22 @@
+# 统一换行符，避免 Windows/macOS 协作时整文件被判定为「全部修改」
+* text=auto
+
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+*.command text eol=lf
+*.sh   text eol=lf
+
+*.py   text eol=lf
+*.js   text eol=lf
+*.css  text eol=lf
+*.html text eol=lf
+*.md   text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+
+# 二进制文件不做任何换行转换
+*.onnx binary
+*.db   binary
+*.jpg  binary
+*.png  binary
+*.gif  binary

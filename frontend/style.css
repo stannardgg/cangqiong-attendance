@@ -1,0 +1,395 @@
+:root {
+  --bg: #f5f6f8;
+  --panel: #ffffff;
+  --border: #e3e5e9;
+  --text: #1f2329;
+  --muted: #8a919c;
+  --primary: #2b5cff;
+  --primary-dark: #1e45c4;
+  --ok: #16a34a;
+  --bad: #dc2626;
+  --warn: #d97706;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* 关键：确保 HTML hidden 属性始终生效（否则会被 .modal-mask 等的 display 覆盖） */
+[hidden] { display: none !important; }
+
+body {
+  font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+}
+
+/* 预览窗口提示 */
+.preview-warning {
+  background: #fef3c7;
+  color: #92400e;
+  border-bottom: 1px solid #fcd34d;
+  padding: 10px 28px;
+  font-size: 13px;
+}
+.preview-warning a { color: #b45309; font-weight: 600; }
+
+/* 顶栏 */
+.topbar {
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.brand { font-size: 18px; font-weight: 600; }
+.brand small { color: var(--muted); font-weight: 400; margin-left: 8px; font-size: 13px; }
+.status { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
+.dot.ok { background: var(--ok); }
+.dot.bad { background: var(--bad); }
+
+/* 导航 */
+nav {
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  display: flex;
+  gap: 4px;
+}
+nav a {
+  padding: 13px 18px;
+  font-size: 14px;
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+nav a.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+
+/* 页面 */
+main { padding: 24px 28px; }
+.page { display: none; }
+.page.active { display: block; }
+
+/* 工具条 */
+.toolbar { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+.toolbar label { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+.toolbar .hint { color: var(--muted); font-size: 13px; margin-left: auto; }
+/* 「只看未签到」勾选项：整块可点，文字与复选框同一行 */
+.toolbar label.check { cursor: pointer; user-select: none; }
+.toolbar label.check input { width: auto; padding: 0; margin: 0; cursor: pointer; accent-color: var(--primary); }
+/* 摄像头下拉：太长的设备名不要撑破工具条 */
+.toolbar select[data-camera-device] { max-width: 220px; }
+/* 实时签到工具条：筛选控件靠左，操作按钮整体靠右 */
+#page-attendance .toolbar > .btn:first-of-type { margin-left: auto; }
+/* 弹窗里的摄像头下拉铺满一行 */
+.modal select { width: 100%; }
+
+/* 按钮 */
+.btn {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn:hover { border-color: var(--primary); color: var(--primary); }
+.btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+.btn.primary:hover { background: var(--primary-dark); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn.danger { color: var(--bad); }
+.btn.danger:hover { border-color: var(--bad); background: #fef2f2; }
+
+/* 表格 */
+table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+th { background: #fafbfc; color: var(--muted); font-weight: 500; font-size: 13px; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: #fafbfc; }
+.col-actions { width: 200px; text-align: right; }
+.col-actions .btn { margin-left: 6px; padding: 5px 10px; font-size: 13px; }
+
+/* 徽章 */
+.badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 12px; }
+.badge.ok { background: #ecfdf5; color: var(--ok); }
+.badge.none { background: #fef3c7; color: var(--warn); }
+.badge.warn { background: #eff6ff; color: #2563eb; }
+
+/* 输入框 */
+input, select {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--panel);
+  color: var(--text);
+}
+input:focus, select:focus { outline: none; border-color: var(--primary); }
+
+/* 弹窗 */
+.modal-mask {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+}
+.modal {
+  background: var(--panel);
+  border-radius: 14px;
+  padding: 24px;
+  width: 380px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.modal.wide { width: 560px; }
+.modal h3 { font-size: 16px; font-weight: 600; }
+.modal label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--muted); }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
+.modal .hint { color: var(--muted); font-size: 13px; text-align: center; }
+
+/* 摄像头面板 */
+.camera-panel {
+  position: relative;
+  background: #111;
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  display: flex; align-items: center; justify-content: center;
+}
+.camera-panel video, .camera-panel canvas { width: 100%; height: 100%; object-fit: cover; }
+/* 浏览器对「前置 / 正面摄像头」的预览默认做水平镜像；这里抵消掉，
+   使预览画面与真实左右方位一致。仅影响显示，不影响截帧识别用的原始数据。
+   由 camera.js 的 _applyMirror() 判断：后置摄像头不加这个类（否则会左右颠倒）。 */
+.camera-panel video.flip-preview { transform: scaleX(-1); transform-origin: center; }
+.camera-empty { color: #888; font-size: 14px; position: absolute; }
+.cam-status {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, .55);
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 14px;
+  font-size: 12px;
+  z-index: 5;
+  max-width: calc(100% - 20px);
+}
+.spoof-hint {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(220, 38, 38, .92);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  z-index: 5;
+}
+/* 摄像头健康小字（右下角，不抢视线；黑屏时截图给开发者即可定位） */
+.cam-diag {
+  position: absolute;
+  left: 10px;
+  bottom: 6px;
+  color: rgba(255, 255, 255, .55);
+  font-size: 11px;
+  font-family: Consolas, Menlo, monospace;
+  pointer-events: none;
+  z-index: 4;
+  max-width: calc(100% - 20px);
+}
+
+/* 防代签：动作指令浮层（盖在画面上，学生只需要照着做）
+ * 位置固定在画面下半部，不遮挡脸部 —— 学生正在看着镜头，指令必须一眼可见。 */
+.challenge {
+  position: absolute;
+  left: 50%;
+  bottom: 42px;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 24px);
+  background: rgba(17, 24, 39, .82);
+  color: #fff;
+  padding: 12px 18px 10px;
+  border-radius: 14px;
+  text-align: center;
+  z-index: 6;
+  backdrop-filter: blur(2px);
+}
+.challenge .ch-instruction {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.challenge .ch-bar {
+  height: 5px;
+  width: 100%;
+  min-width: 160px;
+  background: rgba(255, 255, 255, .22);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.challenge .ch-bar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: #34d399;
+  transition: width .09s linear;
+}
+.challenge .ch-note {
+  margin-top: 6px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, .78);
+}
+
+/* 签到布局 */
+.att-layout { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+.att-list { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.att-list h3 { font-size: 15px; margin-bottom: 6px; }
+.att-list h3 .count { color: var(--primary); font-weight: 600; margin-left: 4px; }
+.att-list .legend { color: var(--muted); font-size: 12px; margin-bottom: 10px; }
+.att-list ul { list-style: none; max-height: 58vh; overflow-y: auto; }
+.att-list li {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 12px; border-bottom: 1px solid var(--border);
+  animation: fadein .3s;
+}
+.att-list li:last-child { border-bottom: none; }
+.att-list li .time { color: var(--muted); font-size: 12px; }
+.att-list li .who { display: flex; align-items: baseline; gap: 8px; }
+.att-list li .who small { color: var(--muted); font-size: 12px; }
+.att-list li.absent { color: var(--muted); }
+.att-list li.present { color: var(--text); }
+.att-list li.present .time { color: var(--ok); font-weight: 600; }
+.att-list li.empty { display: block; }
+
+/* 「最近识别缓存」状态条：告诉老师内存里还留着几个人的记录、多久后自动清空。
+   它只反映内存缓存（识别结果），跟数据库里的签到流水无关。 */
+.recent-cache {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+  font-size: 12px;
+  color: var(--muted);
+}
+.recent-cache .rc-label { font-weight: 600; color: var(--text); }
+.recent-cache .rc-text { flex: 1; line-height: 1.5; }
+.recent-cache .rc-text b { color: var(--primary); font-weight: 600; }
+.recent-cache .rc-text.fail { color: var(--bad); }
+.recent-cache .rc-text .rc-warn { color: var(--warn); font-weight: 600; }
+
+/* 小号按钮：状态条专用，别跟工具栏大按钮抢注意力 */
+.btn.tiny { padding: 3px 10px; font-size: 12px; border-radius: 6px; }
+/* 名单里的「补签」按钮：只在未签到行出现，刻意做得不显眼——它是兜底通道，不是主流程 */
+.btn.tiny.manual { margin-left: 8px; padding: 2px 8px; font-size: 11px; opacity: .75; }
+.btn.tiny.manual:hover { opacity: 1; }
+
+/* 注意：上面的 display:flex 会盖掉浏览器默认的 [hidden]{display:none}，必须显式补一条 */
+.recent-cache[hidden] { display: none !important; }
+
+/* 手机端整块名单面板都不显示，状态条随之隐藏 */
+body[data-device="remote"] .recent-cache { display: none !important; }
+
+/* 手机端「本次签到结果」卡片：只显示刚签到的这个人，不暴露其他学生 */
+.att-my-result {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  animation: fadein .3s;
+}
+.att-my-result .ok-mark {
+  flex: 0 0 46px;
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  background: #ecfdf5;
+  color: var(--ok);
+  font-size: 26px;
+  line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+}
+.att-my-result .ok-name { font-size: 18px; font-weight: 600; }
+.att-my-result .ok-sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+/* 非本机设备（手机）：不展示「谁到了 / 谁没到」的全班名单 */
+body[data-device="remote"] .att-list { display: none !important; }
+
+@keyframes fadein { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; } }
+
+/* 空状态 */
+.empty { text-align: center; color: var(--muted); padding: 40px 0; }
+
+/* 表格横向滚动容器（手机上表格列多，需要左右滑动而不是被压扁） */
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; }
+.table-wrap table { margin: 0; }
+
+/* ==================== 手机 / 窄屏适配 ==================== */
+@media (max-width: 820px) {
+  /* iOS Safari 在字号 < 16px 的输入框获得焦点时会自动放大整页，这里顶到 16px 挡住它 */
+  input, select { font-size: 16px; }
+
+  .preview-warning { padding: 10px 14px; font-size: 12px; }
+
+  /* 顶栏：副标题省掉，留出空间给状态 */
+  .topbar { padding: 10px 14px; gap: 10px; }
+  .brand { font-size: 16px; }
+  .brand small { display: none; }
+  .status { font-size: 12px; white-space: nowrap; }
+
+  /* 导航：窄屏下横向滑动，避免挤成两行 */
+  nav { padding: 0 6px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  nav a { padding: 12px 13px; white-space: nowrap; flex: 0 0 auto; }
+
+  main { padding: 14px; }
+
+  /* 工具栏：每个控件独占一行，按钮做成适合拇指的高度 */
+  .toolbar { gap: 10px; margin-bottom: 14px; }
+  .toolbar label { flex: 1 1 100%; justify-content: space-between; }
+  .toolbar label select,
+  .toolbar label input[type="date"] { flex: 1 1 auto; min-width: 0; }
+  .toolbar label.check { flex: 0 0 auto; }
+  .toolbar .hint { flex: 1 1 100%; margin-left: 0; }
+  .toolbar .btn { flex: 1 1 auto; min-height: 44px; }
+  #page-attendance .toolbar > .btn:first-of-type { margin-left: 0; }
+
+  /* 签到区：改单列，并把「签到名单」提到摄像头前面 —— 手机上主要就是看谁到了 */
+  .att-layout { grid-template-columns: 1fr; gap: 14px; }
+  .att-list { order: 1; }
+  .camera-panel { order: 2; }
+  /* 手机端没有名单，顺序改成：摄像头画面 → 本次签到结果 */
+  body[data-device="remote"] .camera-panel { order: 1; }
+  body[data-device="remote"] .att-my-result { order: 2; }
+  .att-list ul { max-height: 45vh; }
+  .att-list li { padding: 12px; }
+
+  /* 表格：允许横向滑动，不要压成一团 */
+  .table-wrap table { min-width: 560px; }
+  th, td { padding: 10px 12px; }
+  .col-actions { width: 150px; }
+
+  /* 弹窗铺满可用宽度，按钮加大 */
+  .modal, .modal.wide { width: min(94vw, 520px); padding: 18px; }
+  .modal-actions .btn { flex: 1 1 auto; min-height: 44px; }
+
+  .cam-status { top: 8px; left: 8px; padding: 3px 10px; font-size: 11px; }
+  .cam-diag { font-size: 10px; }
+}
+
+/* 超窄屏（例如 iPhone SE 竖屏）：按钮改成两列排 */
+@media (max-width: 420px) {
+  .toolbar .btn { flex: 1 1 calc(50% - 5px); }
+  .att-list li { font-size: 13px; }
+  main { padding: 10px; }
+}

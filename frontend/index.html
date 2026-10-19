@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>苍穹签到系统</title>
+<link rel="stylesheet" href="style.css?v=23">
+</head>
+<body>
+  <div class="preview-warning" id="previewWarning" hidden>
+    当前在预览窗口中，摄像头功能不可用。请用 Chrome 或 Edge 浏览器打开
+    <a href="http://127.0.0.1:8000" target="_blank" rel="noopener">http://127.0.0.1:8000</a>
+  </div>
+  <header class="topbar">
+    <div class="brand">苍穹签到系统 <small>人脸识别课堂签到</small></div>
+    <div class="status"><span class="dot" id="statusDot"></span><span id="statusText">检测后端连接…</span></div>
+  </header>
+
+  <nav>
+    <a href="#" data-page="students" class="active">学生管理</a>
+    <a href="#" data-page="courses">课程管理</a>
+    <a href="#" data-page="attendance">实时签到</a>
+    <a href="#" data-page="records">签到记录</a>
+  </nav>
+
+  <main>
+    <!-- 学生管理 -->
+    <section id="page-students" class="page active">
+      <div class="toolbar">
+        <button class="btn primary" id="btnAddStudent">＋ 新增学生</button>
+        <label class="filter">班级筛选
+          <select id="classFilter"><option value="">全部班级</option></select>
+        </label>
+        <span class="hint" id="studentsHint">注册人脸后，学生才能被识别签到</span>
+      </div>
+      <div class="table-wrap">
+        <table id="studentTable">
+          <thead><tr><th>姓名</th><th>学号</th><th>班级</th><th>人脸</th><th class="col-actions">操作</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 课程管理 -->
+    <section id="page-courses" class="page">
+      <div class="toolbar">
+        <button class="btn primary" id="btnAddCourse">＋ 新增课程</button>
+      </div>
+      <div class="table-wrap">
+        <table id="courseTable">
+          <thead><tr><th>课程名称</th><th>班级</th><th>创建时间</th><th class="col-actions">操作</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 实时签到 -->
+    <section id="page-attendance" class="page">
+      <div class="toolbar">
+        <label>选择课程
+          <select id="attCourse"></select>
+        </label>
+        <label>摄像头
+          <select id="attCamera" data-camera-device></select>
+        </label>
+        <label class="check"><input type="checkbox" id="onlyAbsent"> 只看未签到</label>
+        <button class="btn primary" id="btnStartAtt">开始签到</button>
+        <button class="btn" id="btnStopAtt" disabled>结束签到</button>
+        <button class="btn danger" id="btnClearAtt">清空今日签到</button>
+      </div>
+      <div class="att-layout">
+        <div class="camera-panel">
+          <video id="attVideo" autoplay playsinline muted></video>
+          <canvas id="attCanvas" hidden></canvas>
+          <div class="camera-empty" id="attEmpty">点击「开始签到」启动摄像头</div>
+          <div class="cam-status" id="attStatus" hidden></div>
+          <div class="cam-diag" id="camDiag" hidden></div>
+          <div class="spoof-hint" id="spoofHint" hidden>已拦截非真人画面（照片/屏幕）</div>
+          <!-- 防代签：服务端随机下发的动作指令 + 采集进度 -->
+          <div class="challenge" id="challengeBox" hidden>
+            <div class="ch-instruction" id="chInstruction">请眨一下眼睛</div>
+            <div class="ch-bar"><i id="chBar"></i></div>
+            <div class="ch-note" id="chNote">请正对摄像头，保持画面中只有你一个人</div>
+          </div>
+        </div>
+        <!-- 手机端：只显示「本次签到结果」，不展示全班名单 -->
+        <div class="att-my-result" id="attMyResult" hidden></div>
+        <div class="att-list" id="attRosterPanel">
+          <h3>签到进度 <span class="count" id="attCount">0 / 0</span></h3>
+          <p class="legend">未签到排在前面，已签到显示时间</p>
+          <ul id="attList"></ul>
+          <div class="recent-cache" id="recentCacheBox">
+            <span class="rc-label">最近识别缓存</span>
+            <span class="rc-text" id="recentCacheText">—</span>
+            <button class="btn tiny" id="btnClearRecent">立即清空</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 签到记录 -->
+    <section id="page-records" class="page">
+      <div class="toolbar">
+        <label>选择课程
+          <select id="recCourse"></select>
+        </label>
+        <label>日期
+          <input type="date" id="recDate">
+        </label>
+        <button class="btn primary" id="btnLoadRecords">查询</button>
+        <button class="btn" id="btnExport">导出 CSV</button>
+      </div>
+      <div class="table-wrap">
+        <table id="recordTable">
+          <thead><tr><th>姓名</th><th>学号</th><th>班级</th><th>状态</th><th>签到时间</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- 学生编辑弹窗 -->
+  <div class="modal-mask" id="studentModal" hidden>
+    <div class="modal">
+      <h3 id="studentModalTitle">新增学生</h3>
+      <label>姓名 <input type="text" id="fName" placeholder="如：张三"></label>
+      <label>学号 <input type="text" id="fNo" placeholder="如：2026001"></label>
+      <label>班级 <input type="text" id="fClass" placeholder="如：计算机1班"></label>
+      <div class="modal-actions">
+        <button class="btn" id="btnStudentCancel">取消</button>
+        <button class="btn primary" id="btnStudentSave">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 人脸注册弹窗（摄像头） -->
+  <div class="modal-mask" id="faceModal" hidden>
+    <div class="modal wide">
+      <h3>人脸注册 · <span id="faceStudentName"></span></h3>
+      <label>摄像头
+        <select id="regCamera" data-camera-device></select>
+      </label>
+      <div class="camera-panel">
+        <video id="regVideo" autoplay playsinline muted></video>
+        <div class="camera-empty" id="regEmpty">正在启动摄像头…</div>
+      </div>
+      <p class="hint" id="faceHint">请正对摄像头，点击「拍摄并注册」</p>
+      <div class="modal-actions">
+        <button class="btn" id="btnFaceCancel">关闭</button>
+        <button class="btn primary" id="btnCapture">拍摄并注册</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="camera.js?v=23"></script>
+  <script src="app.js?v=23"></script>
+</body>
+</html>

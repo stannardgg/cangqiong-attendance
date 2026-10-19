@@ -1,0 +1,40 @@
+# ---- 运行环境（体积大，且各机器不同，绝不能进仓库）----
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+
+# ---- 人脸识别模型（合计 189MB，其中 w600k_r50.onnx 167MB 超过 GitHub 单文件 100MB 限制）----
+# 用 Git LFS 才能放进来，本项目选择不放：下载方式见 models/README.md
+models/*.onnx
+*.onnx
+
+# ---- 隐私与运行时数据（★ 绝对不能上传）----
+# data/attendance.db 里是学生姓名、学号、人脸特征向量
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/debug/
+data/backup/
+
+# ---- 构建产物与临时文件 ----
+output/
+temp/
+tmp/
+*.log
+.last_rid
+
+# ---- 编辑器 / 系统 ----
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- 工具链自己的目录 ----
+.workbuddy/
